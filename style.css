@@ -1,0 +1,105 @@
+/* .kategorija{
+    border: solid 1px black;
+}
+.red 
+{
+   border: solid 2px teal;
+} */
+.kategorija
+{
+    border:solid 3px red;
+    display: flex;
+    
+    /* flex-direction: row; */
+}
+.Forma
+{
+    border:solid 1px green;
+    display: flex;
+    flex-direction: column;
+    margin:5px;
+    margin-top:11px;
+    margin-bottom:11px;
+    
+    padding:5px;
+    /* justify-content:start;
+    align-content: space-around;
+    align-items:center; */
+    align-items:stretch;
+    flex-basis:220px;
+
+    
+   
+}
+
+.kontejnerProizvoda
+{
+    
+    display:flex;
+    flex-direction: column;
+    flex-grow:1;
+    flex-basis: 500px;
+    height: 650px;
+    
+
+}
+.red
+{
+    display:flex;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+.proizvod
+{
+    border:solid 2px rgb(138, 3, 26);
+    flex: 1 0 10px;
+    text-align: center;
+    margin:5px;
+    font-size: 20px;
+}
+.bojaDiv{
+    margin:5px;
+    width:10px;
+    height: 10px;
+    display: flex;
+    
+
+}
+.pomocniDivZaBoje{
+    display: flex;
+    flex-direction: row;
+}
+.divDodajBoju
+{
+    display:flex;
+    flex-direction: column;
+    padding:2px;
+    flex-grow:2;
+    align-content:center;
+    border: double 1px purple;
+    margin-top: 20px;
+  
+}
+input 
+{
+    margin:1px;
+}
+div 
+{
+    margin-top:3px;
+    margin-bottom:3px;
+}
+.Color{
+   
+    align-self: center;
+    margin-bottom: 5px;
+    
+}
+/* .Debil
+{
+    align-self:center;
+} */
+h5
+{
+    margin:2px;
+}
