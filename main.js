@@ -12,15 +12,23 @@ fetch("https://localhost:5001/Store/PreuzmiKategorije").then(p => {
                 fetch("https://localhost:5001/Store/PreuzimanjeProizvodjaca").then(p=>{
                     p.json().then(data=>{
                         data.forEach(proizvodjac => {
-                            const temp = new Proizvodjac(proizvodjac.id,proizvodjac.ime, proizvodjac.adresa, proizvodjac.kontakt);
-                            console.log(temp);
+                            
+                            
                             if(proizvodjac.id == proizvod.idProizvodjac)
                             {
-                                
+                                const temp = new Proizvodjac(proizvodjac.id,proizvodjac.ime, proizvodjac.adresa, proizvodjac.kontakt);
                                 kat.proizvodi[proizvod.x*kat.m + proizvod.y].azurirajProizvod(proizvod.kolicina, proizvod.naziv, proizvod.tip, proizvod.x, proizvod.y, proizvod.cena, temp);
-
+                                if(proizvod.boje!=null)
+                                {
+                                   for(let i=0;i<proizvod.boje.length;i++)
+                                   {
+                                    kat.proizvodi[proizvod.x*kat.m + proizvod.y].dodajBoju(proizvod.boje[i]);
+                                   }
+                                }
+                                //console.log(temp);
+                                //console.log("MAIN");
                             }
-                            kat.dodajProizvodjaca(temp);
+                           
                         });
                     });      
                

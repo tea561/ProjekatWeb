@@ -4,8 +4,7 @@ export class Proizvod
     {
         this.naziv=naziv;
         this.tip=tip;
-        this.cena=cena; //verovatno ce biti izbaceno
-        
+        this.cena=cena; 
         this.x=x;
         this.y=y;
         this.kolicina=kolicina;
@@ -24,6 +23,8 @@ export class Proizvod
 
             console.log(boja);
             bojaDiv.style.backgroundColor=boja;
+            console.log("BOJA FUNC");
+            console.log(bojaDiv);
             this.pomocniDivZaBoje.appendChild(bojaDiv);
         }
         else
@@ -39,11 +40,16 @@ export class Proizvod
 
         }
 
+        
         this.miniKontejner=document.createElement("div");
         this.miniKontejner.classList.add("proizvod");
         this.miniKontejner.innerHTML="Prazno mesto";
 
         host.appendChild(this.miniKontejner);
+
+        // this.pomocniDivZaBoje=document.createElement("div");
+        // this.pomocniDivZaBoje.className="pomocniDivZaBoje";
+        // this.miniKontejner.appendChild(this.pomocniDivZaBoje);
         
     }
 
@@ -57,6 +63,11 @@ export class Proizvod
 
     azurirajProizvod(kolicina, naziv, tip, x, y, cena, proizvodjac)
     {
+        console.log("DODAVANJE");
+        console.log(naziv);
+        console.log(tip);
+        console.log(kolicina);
+        console.log(cena);
         this.kolicina=kolicina;
         this.naziv=naziv;
         this.tip=tip;
@@ -64,9 +75,12 @@ export class Proizvod
         this.y=y;
         this.cena=cena;
         this.proizvodjac=proizvodjac;
-        if(naziv="")
+        if(this.naziv==="")
         {
-            this.miniKontejner="Prazno mesto";
+            this.boje=null;
+            console.log("Prazno mesto");
+            
+            this.miniKontejner.innerHTML="Prazno mesto";
 
         }
         else
@@ -74,9 +88,14 @@ export class Proizvod
             this.miniKontejner.innerHTML=this.naziv + "<br />"
             + this.tip + "<br />" + "Cena: " + this.cena 
             + "<br />" + "Kolicina: " + this.kolicina 
-            + "<br />" + "PROIZVODJAC: " + this.proizvodjac.ime;
+            + "<br />";
+            if(this.proizvodjac!=null)
+            { 
+                this.miniKontejner.innerHTML+= "PROIZVODJAC: " + this.proizvodjac.ime;
+            }
    
         }
+
         this.pomocniDivZaBoje=document.createElement("div");
         this.pomocniDivZaBoje.className="pomocniDivZaBoje";
         this.miniKontejner.appendChild(this.pomocniDivZaBoje);

@@ -21,6 +21,7 @@ export class Kategorija
 
     dodajProizvodjaca(proizvodjac)
     {
+        
         this.proizvodjaci.push(proizvodjac);
 
     }
@@ -29,7 +30,7 @@ export class Kategorija
         if(!host)
             throw new Error("Host ne postoji!");
 
-        const naslov = document.createElement("h2");
+        const naslov = document.createElement("h1");
         naslov.innerHTML=this.naziv;
         host.appendChild(naslov);
 
@@ -50,8 +51,9 @@ export class Kategorija
         forma.className="Forma";
         host.appendChild(forma);
 
-        this.crtanjeFormeProizvod(forma);
         this.crtanjeFormeProizvodjac(forma);
+        this.crtanjeFormeProizvod(forma);
+        
         
 
     }
@@ -100,6 +102,8 @@ export class Kategorija
             const adresa=this.kontejner.querySelector(".Adresa");
             const kontakt=this.kontejner.querySelector(".Kontakt");
 
+            
+
             if(naziv.value=="")
             {
                 alert("Uneti naziv proizvodjaca!");
@@ -108,7 +112,7 @@ export class Kategorija
             {
                 alert("Uneti adresu proizvodjaca!");
             }
-            else if(kontakt.value="")
+            else if(kontakt.value=="")
             {
                 alert("Uneti kontakt proizvodjaca!");
 
@@ -117,24 +121,29 @@ export class Kategorija
             else
             {
 
-                //provera da li vec postoji
-
-                let proizvodjacPostoji=this.proizvodjaci.find(proizvodjac =>proizvodjac.naziv==naziv.value && proizvodjac.adresa==adresa.value 
-                    && proizvodjac.kontakt==kontakt.value);
-
-                if(proizvodjacPostoji)
-                {
-                    alert("Proizvodjac vec postoji.");
-                }
-                else
-                {
-                    var p = new Proizvodjac(naziv.value, adresa.value, kontakt.value);
-                    this.proizvodjaci.push(p);
-
-
-                    this.azurirajSelectProizvodjac(this.kontejner.querySelector(".selectProizvodjac"));
- 
-                }
+                fetch("https://localhost:5001/Store/UpisProizvodjaca", {
+                    method:"POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        "ime": naziv.value,
+                        "adresa" : adresa.value,
+                        "kontakt": kontakt.value
+                    })
+                }).then(p=> {
+                    if(p.ok){
+                        alert("Proizvodjac uspesno dodat!");
+                        const pom = this.kontejner.querySelector(".selectProizvodjac");
+                        this.azurirajSelectProizvodjac(pom);
+                    }
+                    else if(p.status==400){
+                        alert("Proizvodjac vec postoji!");
+                    }
+                    else {
+                        alert("Greska prilikom dodavanja prozivodjaca!");
+                    }
+                })
                 naziv.value="";
                 adresa.value="";
                 kontakt.value="";
@@ -148,7 +157,7 @@ export class Kategorija
     }
     crtanjeFormeProizvod(host)
     {
-        console.log(this.proizvodjaci);
+        //console.log(this.proizvodjaci);
         const kontProizvod=document.createElement("div");
         kontProizvod.className="addProizvod";
         
@@ -233,6 +242,43 @@ export class Kategorija
         }
         kontProizvod.appendChild(pozDiv);
 
+        //Proizvodjaci
+        //Dodavanje postojeceg proizvodjaca
+
+
+        let divProizvodjac = document.createElement("div");
+        let selectProizvodjac=document.createElement("select");
+        
+        selectProizvodjac.className="selectProizvodjac";
+        labela=document.createElement("label");
+        labela.innerHTML="Vec dodati proizvodjaci: ";
+        divProizvodjac.appendChild(labela);
+        divProizvodjac.appendChild(selectProizvodjac);
+     
+        this.azurirajSelectProizvodjac(selectProizvodjac);
+        
+
+        kontProizvod.appendChild(divProizvodjac);
+
+        const dugmeRead=document.createElement("button");
+        dugmeRead.innerHTML="Informacije o proizvodjacu";
+        kontProizvod.appendChild(dugmeRead);
+
+        dugmeRead.onclick=(ev) =>{
+            fetch("https://localhost:5001/Store/PreuzimanjeProizvodjaca").then(p=>{
+                p.json().then(data=>{
+                    data.forEach(proizv=>{
+                        if(proizv.ime ==selectProizvodjac.value)
+                        {
+                            let temp="Proizvodjac: " + proizv.ime + "\nAdresa: " + proizv.adresa
+                                    + "\nKontakt: " + proizv.kontakt;
+
+                            alert(temp);
+                        }
+                    });
+                });
+            });
+        }
 
         //Dodavanje boje
         const divDodajBoju=document.createElement("div");
@@ -252,6 +298,7 @@ export class Kategorija
         divDodajBoju.appendChild(tb);
     
         const buttonColor = document.createElement("button");
+        buttonColor.className="dugmeBoja";
         buttonColor.innerHTML="Dodaj boju";
         divDodajBoju.appendChild(buttonColor);
         
@@ -271,7 +318,7 @@ export class Kategorija
                 if(!boje.includes(boja))
                 {
                     
-                    console.log(boja);
+                    //console.log(boja);
                     boje.push(boja);
                     const bojaDiv=document.createElement("div");
                     bojaDiv.className="bojaDiv";
@@ -298,7 +345,9 @@ export class Kategorija
             const tip=this.kontejner.querySelector(".TipProizvoda");
             const cena=this.kontejner.querySelector(".Cena");
             const kolicina=this.kontejner.querySelector(".KolicinaProizvoda");
-            
+            let temp=selectProizvodjac.value;
+            let proizvodjac=this.proizvodjaci.find(p=>p.ime==temp);
+
             if(naziv.value=="")
             {
                 alert("Uneti naziv proizvoda!");
@@ -316,6 +365,9 @@ export class Kategorija
             {
                 alert("Uneti kolicinu proizvoda!");
             }
+            else if(temp==null) {
+                alert("Nije izabran proizvodjac!");
+            }
             else
             {
 
@@ -324,9 +376,21 @@ export class Kategorija
 
 
                 //console.log("Select proizvodjac" + selectProizvodjac.value);
-                let temp=selectProizvodjac.value;
-                let proizvodjac=this.proizvodjaci.find(p=>p.ime==temp);
+                //console.log(boje.length);
+                let str = "";
+                for(let i=0;i<boje.length-1;i++)
+                {
+                    str+=boje[i] + ",";
+                }
+                str+=boje[boje.length-1];
+                //console.log(str);
+                
+             
 
+                                
+                console.log("PIDD");
+                console.log(this.id);
+                
 
                 fetch("https://localhost:5001/Store/UpisProizvoda/" + this.id, {
                     method:"POST",
@@ -334,24 +398,36 @@ export class Kategorija
                         "Content-Type":"application/json"
                     },
                     body: JSON.stringify({
-                        "naziv": naziv,
-                        "tip": tip,
-                        "cena": cena,
-                        "kolicina" : kolicina,
+                        "naziv": naziv.value,
+                        "tip": tip.value,
+                        "cena": cena.value,
+                        "kolicina" : kolicina.value,
                         "x" : a,
                         "y": b,
                         "idProizvodjac":proizvodjac.id,
-                        "boje" : boje
+                        "boje":boje
+                        
                         })
                     }).then(p=>{
                         if(p.ok){
+                            // console.log(naziv.value);
+                            // console.log(tip.value);
+                            // console.log(kolicina.value);
+                            // console.log(cena.value);
                             this.proizvodi[a*this.m + b].azurirajProizvod(kolicina.value, naziv.value, tip.value, a, b, cena.value, proizvodjac);
                             if(boje!=null)
                             {
+                                console.log("DODAVANJE BOJE");
                                 boje.forEach(element => {
                                     this.proizvodi[a*this.m+b].dodajBoju(element);
                                 })
                             }
+                            naziv.value="";
+                            tip.value="";
+                            cena.value="";
+                            kolicina.value="";
+                            pomocniDivZaBoje.innerHTML="";
+                            boje.splice(0, boje.length);
 
                         }
                         else if(p.status==400)
@@ -362,8 +438,9 @@ export class Kategorija
                                 postoji.y=q.y;
                                 alert("Proizvod postoji u katalogu na poziciji ("+ postoji.x +"," + postoji.y +")");
                             });
+                            alert("GRESKA");
                         }
-                        else if(p.status=406)
+                        else if(p.status==406)
                         {
                             alert("Pozicija zauzeta!");
                         }
@@ -373,48 +450,7 @@ export class Kategorija
                         }
                    
                 })
-                // console.log(temp);
-                // console.log(proizvodjac);
-                // //provera da li vec postoji
-
-                // let proizvodPostoji=this.proizvodi.find(proizvod =>proizvod.naziv==naziv.value && proizvod.tip==tip.value 
-                //     && proizvod.kolicina==kolicina.value && proizvod.cena==cena.value 
-                //     && proizvod.x==a && proizvod.y==b);
-
-                // if(proizvodPostoji)
-                // {
-                //     alert("Proizvod vec postoji.");
-                // }
-                // else
-                // {
-                //     this.proizvodi[a*this.m + b].azurirajProizvod(kolicina.value, naziv.value, tip.value, a, b, cena.value, proizvodjac);
-
-                //     if(boje!=null)
-                //     {
-                //     boje.forEach(element => {
-                //         this.proizvodi[a*this.m+b].dodajBoju(element);
-                //     })
-                //     }
-
-                    
-
-                // }
-                naziv.value="";
-                tip.value="";
-                cena.value="";
-                kolicina.value="";
-                pomocniDivZaBoje.innerHTML="";
-                boje.splice(0, boje.length);
-
-
-
-                // boje.forEach(element => {
-                //     this.proizvodi[a*this.m+b].dodajBoju(element);
-                // });
-                // this.proizvodi[a*this.m+b].dodajBoju(boja);
-                
-
-                
+        
             }
 
             
@@ -426,83 +462,214 @@ export class Kategorija
         const dugmeUpdate=document.createElement("button");
         dugmeUpdate.innerHTML="Azuriraj proizvod";
         kontProizvod.appendChild(dugmeUpdate);
-        let temp=0;
-
+        
         dugmeUpdate.onclick=(ev)=>{
-            
-            
+            dugme.disabled=true;
+            sacuvajIzmene.disabled=false;
             dugmeUpdate.disabled=true;
-            console.log("Update");
+            //console.log("Update");
             let a=parseInt(selectX.value);
             let b=parseInt(selectY.value);
-            console.log(a);
-            console.log(b);
-            console.log(this.proizvodi[a*this.m+b]);
+            // console.log(a);
+            // console.log(b);
+            // console.log(this.proizvodi[a*this.m+b]);
             if(this.proizvodi[a*this.m+b].naziv=="")
             {
                 //provera samo za naziv jer nikad ne moze biti dodat proizvod bez naziva
 
                 alert("Ne postoji proizvod na poziciji: (" + a + "," + b +")");
+                dugme.disabled=false;
+                dugmeUpdate.disabled=false;
             }
-            else 
-            {
+           
+            const naziv=this.kontejner.querySelector(".NazivProizvoda");
+            const tip=this.kontejner.querySelector(".TipProizvoda");
+            const cena=this.kontejner.querySelector(".Cena");
+            const kolicina=this.kontejner.querySelector(".KolicinaProizvoda");
+
+            naziv.value=this.proizvodi[a*this.m+b].naziv;
+            tip.value=this.proizvodi[a*this.m+b].tip;
+            cena.value=this.proizvodi[a*this.m+b].cena;
+            kolicina.value=this.proizvodi[a*this.m+b].kolicina;
+            selectProizvodjac.value=this.proizvodi[a*this.m+b].proizvodjac.ime;
+           
+        }
+
+            const sacuvajIzmene=document.createElement("button");
+            sacuvajIzmene.innerHTML="Sacuvaj izmene";
+            kontProizvod.appendChild(sacuvajIzmene);
+            sacuvajIzmene.disabled=true;
+
+            sacuvajIzmene.onclick=(ev)=>{
+                dugme.disabled=false;
+                dugmeUpdate.disabled=false;
+                sacuvajIzmene.disabled=true;
+                let a=parseInt(selectX.value);
+                let b=parseInt(selectY.value);
                 const naziv=this.kontejner.querySelector(".NazivProizvoda");
                 const tip=this.kontejner.querySelector(".TipProizvoda");
                 const cena=this.kontejner.querySelector(".Cena");
                 const kolicina=this.kontejner.querySelector(".KolicinaProizvoda");
+                let pom=selectProizvodjac.value;
+                let proizvodjac2=this.proizvodjaci.find(p=>p.ime==pom);
+                
+               
 
-                naziv.value=this.proizvodi[a*this.m+b].naziv;
-                tip.value=this.proizvodi[a*this.m+b].tip;
-                cena.value=this.proizvodi[a*this.m+b].cena;
-                kolicina.value=this.proizvodi[a*this.m+b].kolicina;
+                fetch("https://localhost:5001/Store/AzuriranjeProizvoda/" + this.id, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
 
-                dugme.innerHTML="Sacuvaj izmene";
+                     },
+                    body: JSON.stringify ({
+                        "naziv": naziv.value,
+                        "tip": tip.value,
+                        "cena": cena.value,
+                        "kolicina" : kolicina.value,
+                        "x" : a,
+                        "y": b,
+                        "idProizvodjac":proizvodjac2.id,
+                        "boje":boje
+                    
+                    })
+                }).then(p=>{
+
+                    if(p.ok){
+                        this.proizvodi[a*this.m+b].azurirajProizvod(kolicina.value, naziv.value,tip.value, a, b, cena.value, proizvodjac2);
+                        if(boje!=null)
+                            {
+                                boje.forEach(element => {
+                                    this.proizvodi[a*this.m+b].dodajBoju(element);
+                                })
+                            }
+                            naziv.value="";
+                            tip.value="";
+                            cena.value="";
+                            kolicina.value="";
+                            pomocniDivZaBoje.innerHTML="";
+                            boje.splice(0, boje.length);
+
+                    }
+                    else 
+                    {
+                        alert("Doslo je do greske prilikom azuriranja!");
+                    }
+                });
                 
             }
             
+        //DELETE
+        const dugmeDelete=document.createElement("button");
+        dugmeDelete.innerHTML="Obrisi";
+        kontProizvod.appendChild(dugmeDelete);
+
+        dugmeDelete.onclick=(ev) =>{
+            let a=parseInt(selectX.value);
+            let b=parseInt(selectY.value);
+            console.log("BRISANJE");
+            console.log(this.proizvodi[a*this.m+b].boje);
+
+            fetch("https://localhost:5001/Store/BrisanjeProizvoda/"+this.id , {
+                method:"DELETE",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "idkat":this.id,
+                    "x":a,
+                    "y":b
+                })
+
+            }).then(p=>{
+                if(p.ok)
+                {
+                    this.proizvodi[a*this.m+b].azurirajProizvod(0,"","",a,b,0,null);
+                }
+                else if(p.status==406)
+                {
+                    alert("Pogresna lokacija proizvoda!");
+                }
+                else
+                {
+                    alert("Greska prilikom brisanja proizvoda!");
+                }
+            });
         }
-
-        //Proizvodjaci
-        //Dodavanje postojeceg proizvodjaca
-        let divProizvodjac = document.createElement("div");
-        let selectProizvodjac=document.createElement("select");
-        
-        selectProizvodjac.className="selectProizvodjac";
-        labela=document.createElement("label");
-        labela.innerHTML="Vec dodati proizvodjaci: ";
-        divProizvodjac.appendChild(labela);
-        divProizvodjac.appendChild(selectProizvodjac);
         
 
-        this.azurirajSelectProizvodjac(selectProizvodjac);
+        // //Proizvodjaci
+        // //Dodavanje postojeceg proizvodjaca
+
+
+        // let divProizvodjac = document.createElement("div");
+        // let selectProizvodjac=document.createElement("select");
+        
+        // selectProizvodjac.className="selectProizvodjac";
+        // labela=document.createElement("label");
+        // labela.innerHTML="Vec dodati proizvodjaci: ";
+        // divProizvodjac.appendChild(labela);
+        // divProizvodjac.appendChild(selectProizvodjac);
+     
+        // this.azurirajSelectProizvodjac(selectProizvodjac);
         
 
-        kontProizvod.appendChild(divProizvodjac);
+        // kontProizvod.appendChild(divProizvodjac);
+
+        // const dugmeRead=document.createElement("button");
+        // dugmeRead.innerHTML="Informacije o proizvodjacu";
+        // kontProizvod.appendChild(dugmeRead);
+
+        // dugmeRead.onclick=(ev) =>{
+        //     fetch("https://localhost:5001/Store/PreuzimanjeProizvodjaca").then(p=>{
+        //         p.json().then(data=>{
+        //             data.forEach(proizv=>{
+        //                 if(proizv.ime ==selectProizvodjac.value)
+        //                 {
+        //                     let temp="Proizvodjac: " + proizv.ime + "\nAdresa: "
+        //                             + "\nKontakt: " + proizv.kontakt;
+
+        //                     alert(temp);
+        //                 }
+        //             });
+        //         });
+        //     });
+        // }
 
     }
 
     azurirajSelectProizvodjac(selectProizvodjac)
     {
-        console.log(selectProizvodjac);
-        console.log(this.proizvodjaci.length);
-        console.log(this.proizvodjaci);
-        if(selectProizvodjac!=null)
+        var length = selectProizvodjac.options.length;
+        for(let i=length-1;i>=0;i--)
         {
-            var length = selectProizvodjac.options.length;
-            for(let i=length-1;i>=0;i--)
-            {
-                selectProizvodjac.options[i]=null;
-            }
-
-            let opcijaProizvodjac=null;
-            for(let i=0;i<this.proizvodjaci.length;i++)
-            {
-                opcijaProizvodjac=document.createElement("option");
-                opcijaProizvodjac.innerHTML=this.proizvodjaci[i].ime;
-                opcijaProizvodjac.value=this.proizvodjaci[i].ime;
-                selectProizvodjac.appendChild(opcijaProizvodjac);
-            }
+            selectProizvodjac.options[i]=null;
         }
+        let opcijaProizvodjac=null;
+        opcijaProizvodjac=document.createElement("option");
+        opcijaProizvodjac.innerHTML="";
+        opcijaProizvodjac.value=null;
+        selectProizvodjac.appendChild(opcijaProizvodjac);
+
+        fetch("https://localhost:5001/Store/PreuzimanjeProizvodjaca").then(p=> {
+            p.json().then(data=>{
+                data.forEach(proizvodjac => {
+                    //console.log(proizvodjac.id);
+                    //console.log(proizvodjac.ime);
+                    //console.log(proizvodjac.adresa);
+                    //console.log(proizvodjac.kontakt);
+                    
+                    const temp = new Proizvodjac(proizvodjac.id, proizvodjac.ime, proizvodjac.adresa, proizvodjac.kontakt);
+                    
+                    
+                    this.dodajProizvodjaca(temp);
+
+                    opcijaProizvodjac=document.createElement("option");
+                    opcijaProizvodjac.innerHTML=temp.ime;
+                    opcijaProizvodjac.value=temp.ime;
+                    selectProizvodjac.appendChild(opcijaProizvodjac);
+                });
+            });
+        });
 
     }
 
