@@ -1,0 +1,3 @@
+INSERT INTO Kategorije VALUES ('Radna soba', 3, 5);
+INSERT INTO Kategorije VALUES ('Dnevna soba', 3, 5);
+INSERT INTO Kategorije VALUES ('Trpezarija', 2, 3);s
